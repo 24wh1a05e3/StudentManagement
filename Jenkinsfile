@@ -19,6 +19,11 @@ pipeline {
                 sh 'npm test'
             }
         }
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t studentmanagement:jenkins .'
+    }
+}
     }
 
     post {

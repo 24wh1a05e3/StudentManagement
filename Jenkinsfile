@@ -32,7 +32,7 @@ pipeline {
                 '''
             }
         }
-        stage('Deploy to Kubernetes') {{
+        stage('Deploy to Kubernetes') {
             steps {
                 withKubeConfig(caCertificate: '''-----BEGIN CERTIFICATE-----
 MIIDBjCCAe6gAwIBAgIBATANBgkqhkiG9w0BAQsFADAVMRMwEQYDVQQDEwptaW5p

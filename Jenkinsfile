@@ -21,10 +21,18 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t studentmanagement:jenkins .'
+                sh 'docker build -t studentmanagement:${BUILD_NUMBER} .'
             }
         }
-        stage('Verify Kubernetes Connection') {
+        stage('Load Image into Minikube') {
+            steps {
+                sh '''#!/bin/bash
+                set -euo pipefail
+                docker save "studentmanagement:${BUILD_NUMBER}" | docker exec -i minikube ctr -n k8s.io images import -
+                '''
+            }
+        }
+        stage('Deploy to Kubernetes') { {
             steps {
                 withKubeConfig(caCertificate: '''-----BEGIN CERTIFICATE-----
 MIIDBjCCAe6gAwIBAgIBATANBgkqhkiG9w0BAQsFADAVMRMwEQYDVQQDEwptaW5p
@@ -45,6 +53,8 @@ zTqWLj5ZO0KD2bodiFPHqL8KKh0lKnzAwFASC3fx0lbQvsNwUBqM7lTCWAlp4LkD
 PI6yROovgMy6sOjcaS/CYDpMlYBPMRj32rPWTXdqPRK1vHTC/mviim3+0SmM5KWe
 Ca/UAqpRFeqD/Q==
 -----END CERTIFICATE-----''', clusterName: 'minikube', contextName: 'studentmanagement-jenkins', credentialsId: 'studentmanagement-k8s-token', namespace: 'default', restrictKubeConfigAccess: true, serverUrl: 'https://192.168.49.2:8443') {
+    sh 'kubectl set image deployment/studentmanagement studentmanagement=studentmanagement:${BUILD_NUMBER}'
+    sh 'kubectl rollout status deployment/studentmanagement --timeout=180s'
     sh 'kubectl get deployment studentmanagement'
      }
             }

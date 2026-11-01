@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: studentmanagement
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: studentmanagement
+  template:
+    metadata:
+      labels:
+        app: studentmanagement
+    spec:
+      containers:
+        - name: studentmanagement
+          image: studentmanagement:jenkins
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
